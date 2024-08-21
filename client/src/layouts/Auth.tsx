@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation, useSignupMutation } from "../redux/api/authApiSlice";

@@ -1,10 +1,7 @@
 import { useGetTrackedProductsQuery } from "../redux/slice/userApiSlice";
 import ProductCard from "../components/ProductCard";
 import { ProductCardProp } from "../utils/constants";
-import Notfound from "../assets/not_found.svg";
-import { Link } from "react-router-dom";
-import { Button } from "../components/ui/button";
-type TrackedProductsProps = {
+import Notfound from "../assets/not_found.svg";type TrackedProductsProps = {
   data: ProductCardProp[];
   isLoading: boolean;
   isSuccess: boolean;

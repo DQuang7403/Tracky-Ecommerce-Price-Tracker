@@ -23,7 +23,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       // send refresh token to get new access token 
       const refreshResult = await baseQuery('/auth/refresh', api, extraOptions)
       if (refreshResult?.data) {
-          const user = api.getState().auth.user_info
+          api.getState().auth.user_info
           // store the new token 
           api.dispatch(logIn({ ...refreshResult.data }))
           // retry the original query with new access token 
@@ -40,5 +40,5 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const apiSlice: any = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Tracked", "Auth"],
-  endpoints: builder => ({})
+  endpoints: (_builder: any) => ({})
 })
