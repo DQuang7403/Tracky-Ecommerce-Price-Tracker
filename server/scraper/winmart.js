@@ -7,8 +7,8 @@ import proxyChain from "proxy-chain";
 puppeteer.use(StealthPlugin());
 
 let browser;
-const username = process.env.WEBSHARE_USERNAME;
-const password = process.env.WEBSHARE_PASSWORD;
+// const username = process.env.WEBSHARE_USERNAME;
+// const password = process.env.WEBSHARE_PASSWORD;
 // args: [`--proxy-server=${newProxyUrl}`],
 
 // const puppeteerConfig = {
