@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+*::-webkit-scrollbar {
+  @apply bg-transparent w-2;
+}
+*::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-lg md:block hidden;
+}
+
+.scrollbar-hover::-webkit-scrollbar-thumb {
+  @apply bg-transparent rounded-lg;
+}
+
+.scrollbar-hover:hover::-webkit-scrollbar-thumb {
+  @apply bg-gray-400;
+}
+
+.hidden-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-transparent;
+}
+.loader {
+  width: 50px;
+  padding: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #014c86;
+  --_m: conic-gradient(#0000 10%, #000), linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.container {
+  @apply bg-[#fff] rounded-lg shadow-sm relative overflow-hidden w-[769px] max-w-full min-h-[480px];
+}
+
+.container form {
+  @apply flex items-center justify-center flex-col px-4 sm:px-10 py-0 h-full;
+}
+.container input {
+  @apply bg-[#eee] border-none py-2 px-3 text-sm rounded-lg w-full outline-none my-2;
+}
+
+.container-form {
+  @apply absolute top-0 h-full transition-all duration-300;
+}
+.sign-in {
+  @apply left-0 sm:w-1/2 z-[2] w-full;
+}
+.container.active .sign-in {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.sign-up {
+  @apply left-0 sm:w-1/2 z-[1] opacity-0 w-full;
+}
+
+.container.active .sign-up {
+  @apply sm:translate-x-full opacity-100 z-[5];
+  animation: move 150ms;
+}
+
+@keyframes move {
+  0%,
+  49.99% {
+    opacity: 0;
+    z-index: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 1;
+    z-index: 5;
+  }
+}
+
+.toggle-container {
+  @apply absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all z-50 rounded-l-[100px] duration-300 sm:block hidden;
+}
+
+.container.active .toggle-container {
+  transform: translateX(-100%);
+  border-radius: 0 100px 100px 0;
+}
+
+.toggle {
+  @apply bg-[#512da8] h-full bg-gradient-to-r from-[#5c6bc0] to-[#014C86] relative left-[-100%] w-[200%] translate-x-0 transition-all duration-300;
+}
+.container.active .toggle {
+  transform: translateX(50%);
+}
+.toggle-panel {
+  @apply absolute w-1/2 h-full flex flex-col items-center justify-center px-8 text-center top-0 translate-x-0 transition-all duration-300;
+}
+
+.toggle-left {
+  transform: translateX(-200%);
+}
+
+.container.active .toggle-left {
+  transform: translateX(0);
+}
+
+.toggle-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.container.active .toggle-right {
+  transform: translateX(200%);
+}
