@@ -101,7 +101,7 @@ export default function Auth() {
   };
 
   return (
-    <section className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gradient-to-tr from-[#e2e2e2] to-[#c9d6ff]">
+    <section className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center sm:bg-gradient-to-tr sm:from-[#e2e2e2] sm:to-[#c9d6ff] bg-white">
       <div className={`container ${signUpForm ? "active" : ""}`}>
         <div className="container-form sign-up ">
           <form onSubmit={handelSignUp}>

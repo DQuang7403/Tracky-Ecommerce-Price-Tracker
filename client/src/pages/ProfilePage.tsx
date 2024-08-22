@@ -75,9 +75,9 @@ export default function ProfilePage() {
     }
   };
   return (
-    <section className="sm:px-20 py-10 bg-gradient-to-tr from-[#e2e2e2] to-[#c9d6ff] h-[calc(100vh-64px)] overflow-hidden">
+    <section className="sm:px-20 sm:py-10 sm:bg-gradient-to-tr sm:from-[#e2e2e2] sm:to-[#c9d6ff] h-[calc(100vh-64px)] overflow-hidden bg-white">
       <div className=" grid bg-white h-full rounded-lg shadow-sm lg:grid-cols-[auto,1fr] grid-cols-1 flex-grow-1 overflow-auto">
-        <div className="bg-[#5569BC] max-w-[400px] h-full min-w-[340px] lg:flex hidden justify-center flex-col items-center p-4 text-white ">
+        <div className="bg-[#5569BC] w-[350px] lg:flex hidden justify-center flex-col items-center p-4 text-white ">
           <img
             src={personalSite}
             alt="profile"

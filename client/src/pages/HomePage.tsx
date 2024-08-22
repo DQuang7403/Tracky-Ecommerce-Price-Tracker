@@ -109,9 +109,9 @@ export default function HomePage() {
           </h2>
           <Button onClick={() => fetchOffers()}>Scrape new offer</Button>
         </div>
-        <div className="w-full relative h-full">
+        <div className="w-full relative min-h-[200px]">
           {loading && (
-            <div className="flex items-center gap-4 text-xl justify-center absolute z-10 bg-[#F5F5F5] py-2 px-4 rounded-md top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
+            <div className="flex items-center gap-4 text-xl justify-center absolute z-10 bg-[#F5F5F5] py-2 px-4 rounded-md top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-fit w-full sm:w-52">
               <span className="loader z-20"></span> Looking for the latest
               offers
             </div>

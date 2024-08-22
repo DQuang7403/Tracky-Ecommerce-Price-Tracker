@@ -46,7 +46,7 @@ export async function addOrUpdateCronJob(user) {
   await scheduleUserCronJob(user);
 }
 
-export default async function initializeCronJobs() {
+export async function initializeCronJobs() {
   const users = await User.find({
     trackedProducts: { $exists: true, $not: { $size: 0 } },
   });

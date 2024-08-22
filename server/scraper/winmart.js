@@ -1,4 +1,3 @@
-import { setTimeout } from "node:timers/promises";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { executablePath } from "puppeteer";
@@ -11,15 +10,6 @@ let browser;
 // const password = process.env.WEBSHARE_PASSWORD;
 // args: [`--proxy-server=${newProxyUrl}`],
 
-// const puppeteerConfig = {
-//   headless: true,
-//   executablePath:
-//     process.env.NODE_ENV === "production"
-//       ? process.env.PUPPETEER_EXECUTABLE_PATH
-//       : executablePath(),
-//   userDataDir: "C:/Users/ADMIN/AppData/Local/Google/Chrome/User Data/Default",
-//   args: ["--no-sandbox", "--disable-setuid-sandbox"],
-// };
 async function autoScroll(page) {
   await page.evaluate(async () => {
     let limit = 2000;
@@ -45,6 +35,7 @@ export async function scrapeSaleProducts() {
     // const oldProxyUrl = `http://${username}:${password}@p.webshare.io:80`;
     // const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
     browser = await puppeteer.launch({
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -125,6 +116,7 @@ export async function scrapeSaleProducts() {
 export async function scrapeProductsByName(productName) {
   try {
     browser = await puppeteer.launch({
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -204,6 +196,7 @@ export async function scrapeProductsByName(productName) {
 export async function scrapeSingleProduct(productURL) {
   try {
     browser = await puppeteer.launch({
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -282,6 +275,7 @@ export async function scrapeSingleProduct(productURL) {
 const testBot = async () => {
   try {
     const browser = await puppeteer.launch({
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
