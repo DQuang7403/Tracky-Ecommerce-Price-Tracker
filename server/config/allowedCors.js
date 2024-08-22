@@ -1,4 +1,1 @@
-export const allowOrigins = [
-  "http://localhost:5173",
-  "https://tracky.onrender.com",
-];
+export const allowOrigins = ["http://localhost:5173", process.env.CLIENT_URL];

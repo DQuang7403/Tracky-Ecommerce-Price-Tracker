@@ -8,7 +8,7 @@ import { persistor, store } from "./redux/store.ts";
 import { PersistGate } from "redux-persist/integration/react";
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 
-if (process.env.NODE_ENV === "production") {
+if (import.meta.env.VITE_NODE_ENV === "production") {
   disableReactDevTools();
 }
   
