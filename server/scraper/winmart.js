@@ -54,7 +54,7 @@ export async function scrapeSaleProducts() {
     });
 
     const selector = ".product-carousel-v2__SliderSection-sc-1hy54ys-4";
-    await page.waitForSelector(selector);
+    await page.waitForSelector(selector, { timeout: 3 * 60 * 1000 });
 
     const el = await page.$(selector);
     await autoScroll(page);
@@ -132,7 +132,7 @@ export async function scrapeProductsByName(productName) {
     });
 
     const selector = ".search-boxstyle__StyledInput-sc-1p7r5j6-1";
-    await page.waitForSelector(selector);
+    await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
     await page.click(selector);
     //go to page box
     await page.type(".search-boxstyle__StyledInput-sc-1p7r5j6-1", productName);
@@ -211,7 +211,7 @@ export async function scrapeSingleProduct(productURL) {
     });
 
     const selector = ".product-detailsstyle__ProductInfo-sc-127s7qc-4.kxyanY";
-    const el = await page.waitForSelector(selector);
+    const el = await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
 
     const productDetails = await el.evaluate(() => {
       const name =
