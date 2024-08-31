@@ -51,6 +51,10 @@ const ProductSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    site: {
+      type: String,
+      require: true,
+    }
   },
   { timestamps: true },
 );

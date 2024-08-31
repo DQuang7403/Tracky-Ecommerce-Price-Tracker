@@ -30,7 +30,21 @@ async function autoScroll(page) {
   });
 }
 
-export async function scrapeSaleProducts() {
+async function closeFloatingAd(page) {
+  try {
+    const adSelector = ".floating__FloatingWrapper-sc-2rf53f-0.iAgrnJ";
+    const adElement = await page.waitForSelector(adSelector, {
+      timeout: 10 * 1000,
+    });
+    if (adElement) {
+      await page.click("span.MuiBadge-badge");
+    }
+  } catch (error) {
+    console.error("Error closing floating ad:", error);
+  }
+}
+
+export async function scrapeSaleProductsFromWinmart() {
   try {
     // const oldProxyUrl = `http://${username}:${password}@p.webshare.io:80`;
     // const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
@@ -41,8 +55,6 @@ export async function scrapeSaleProducts() {
           ? process.env.PUPPETEER_EXECUTABLE_PATH
           : executablePath(),
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      userDataDir:
-        "C:/Users/ADMIN/AppData/Local/Google/Chrome/User Data/Default",
     });
 
     const page = await browser.newPage();
@@ -53,11 +65,13 @@ export async function scrapeSaleProducts() {
       waitUntil: "domcontentloaded",
     });
 
+    await closeFloatingAd(page);
+    await autoScroll(page);
+
     const selector = ".product-carousel-v2__SliderSection-sc-1hy54ys-4";
     await page.waitForSelector(selector, { timeout: 3 * 60 * 1000 });
 
     const el = await page.$(selector);
-    await autoScroll(page);
 
     const products = await el.evaluate(() => {
       return Array.from(
@@ -89,17 +103,24 @@ export async function scrapeSaleProducts() {
           .filter((div) => div.innerText.includes("ĐVT: "))
           .map((div) => div.innerText.trim().replace("ĐVT: ", "").trim())
           .pop();
-
         return {
           name: titleElement ? titleElement.innerText : null,
           href: linkElement ? linkElement.href : null,
-          price: priceElement ? priceElement.innerText.trim() : null,
+          price: priceElement
+            ? parseInt(
+                priceElement.innerText
+                  .trim()
+                  .replace(/[^\d\.]/g, "")
+                  .replace(".", ""),
+              )
+            : null,
           discount:
             discountElement &&
             discountElement.innerText.replace("-", "").replace("%", "").trim(),
           specialOffer: specialOffer && specialOffer.innerText.trim(),
           image: imageUrl,
           unit: unit,
+          site: "winmart",
         };
       });
     });
@@ -107,13 +128,13 @@ export async function scrapeSaleProducts() {
     return products;
   } catch (error) {
     console.log("Scraping failed", error);
-    return null;
+    return [];
   } finally {
     await browser?.close();
     // await proxyChain.closeAnonymizedProxy(newProxyUrl, true);
   }
 }
-export async function scrapeProductsByName(productName) {
+export async function scrapeProductsByNameFromWinmart(productName) {
   try {
     browser = await puppeteer.launch({
       headless: true,
@@ -122,6 +143,7 @@ export async function scrapeProductsByName(productName) {
           ? process.env.PUPPETEER_EXECUTABLE_PATH
           : executablePath(),
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      ignoreDefaultArgs: ["--enable-automation"],
     });
 
     const page = await browser.newPage();
@@ -137,7 +159,7 @@ export async function scrapeProductsByName(productName) {
     //go to page box
     await page.type(".search-boxstyle__StyledInput-sc-1p7r5j6-1", productName);
     await page.keyboard.press("Enter");
-
+    await page.waitForNavigation({ waitUntil: "domcontentloaded" });
     //auto scroll to load products
     await autoScroll(page);
     //actual scraping products
@@ -155,32 +177,45 @@ export async function scrapeProductsByName(productName) {
             ".product-card-two__Discount-sc-1lvbgq2-4.csmOzF",
           );
           const imageElements = product.querySelectorAll("img");
-
+          const specialOfferElements = product.querySelector(
+            "div.product-card-two__Zb01Text-sc-1lvbgq2-8",
+          );
           let imageUrl = null;
 
-          imageElements.forEach((img) => {
+          for (let img of imageElements) {
             if (img.src.startsWith("http")) {
               imageUrl = img.src;
+              break;
             }
-          });
+          }
           const unitDivs = Array.from(product.querySelectorAll("div"));
+
           let unit = null;
           unit = unitDivs
             .filter((div) => div.innerText.includes("ĐVT: "))
             .map((div) => div.innerText.trim().replace("ĐVT: ", "").trim())
             .pop();
+
           return {
             name: titleElement ? titleElement.innerText : null,
             href: linkElement ? linkElement.href : null,
-            price: priceElement ? priceElement.innerText.trim() : null,
+            price: priceElement
+              ? Number(priceElement.innerText.trim().replace(/[^\d]/g, ""), 10)
+              : null,
             discount:
-              discountElement &&
-              discountElement.innerText
-                .replace("-", "")
-                .replace("%", "")
-                .trim(),
+              Number(
+                discountElement &&
+                  discountElement.innerText
+                    .replace("-", "")
+                    .replace("%", "")
+                    .trim(),
+                10,
+              ) || null,
             image: imageUrl,
             unit: unit,
+            specialOffer:
+              specialOfferElements && specialOfferElements.innerText.trim(),
+            site: "winmart",
           };
         },
       );
@@ -188,12 +223,12 @@ export async function scrapeProductsByName(productName) {
     return products;
   } catch (error) {
     console.log("Scraping failed", error);
-    return null;
+    return [];
   } finally {
     await browser?.close();
   }
 }
-export async function scrapeSingleProduct(productURL) {
+export async function scrapeSingleProductFromWinmart(productURL) {
   try {
     browser = await puppeteer.launch({
       headless: true,
@@ -219,9 +254,13 @@ export async function scrapeSingleProduct(productURL) {
           .querySelector("h1.product-detailsstyle__ProductTitle-sc-127s7qc-8")
           ?.innerText.trim() || null;
       const price =
-        document
-          .querySelector(".product-detailsstyle__ProductPrice-sc-127s7qc-22")
-          ?.innerText.trim() || null;
+        parseInt(
+          document
+            .querySelector(".product-detailsstyle__ProductPrice-sc-127s7qc-22")
+            ?.innerText.trim()
+            .replace(/[^\d\.]/g, "")
+            .replace(".", ""),
+        ) || null;
       const transportOffer =
         document
           .querySelector(
@@ -259,6 +298,7 @@ export async function scrapeSingleProduct(productURL) {
         specialOffer,
         description,
         discount: !!document.querySelector("line-throught"),
+        site: "winmart",
       };
     });
 
@@ -292,3 +332,5 @@ const testBot = async () => {
     console.log(error);
   }
 };
+
+// scrapeProductsByNameFromWinmart("coca")

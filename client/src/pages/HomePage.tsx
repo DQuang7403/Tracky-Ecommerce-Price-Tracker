@@ -63,7 +63,7 @@ export default function HomePage() {
         console.log(error);
       }
     };
-    if (products.length === 0) {
+    if (products === null || products.length === 0  ) {
       getInitialProducts();
     }
   }, [products]);
@@ -124,7 +124,7 @@ export default function HomePage() {
           >
             <CarouselContent>
               {products?.map(
-                (product: JSX.IntrinsicAttributes & ProductCardProp, index) => {
+                (product:ProductCardProp, index) => {
                   return (
                     <CarouselItem
                       key={index}
@@ -140,6 +140,7 @@ export default function HomePage() {
                         price={product.price}
                         unit={product.unit}
                         specialOffer={product.specialOffer}
+                        site={product.site}
                       />
                     </CarouselItem>
                   );

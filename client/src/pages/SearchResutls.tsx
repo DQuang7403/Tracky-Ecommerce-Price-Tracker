@@ -57,6 +57,7 @@ export default function SearchResutls() {
                 price={product.price}
                 unit={product.unit}
                 specialOffer={product.specialOffer}
+                site={product.site}
               />
             );
           })

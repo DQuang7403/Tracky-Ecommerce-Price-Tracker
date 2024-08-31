@@ -89,12 +89,12 @@ export default function PriceHistory({
             <h2>
               Lowest Price:
               <div className="text-black">
-                {priceFormatter(minPrice.price_history)}
+                {priceFormatter(minPrice.price_history)} đ
               </div>
             </h2>
             <h2>
               Average Price:
-              <div className="text-black">{priceFormatter(averagePrice)}</div>
+              <div className="text-black">{priceFormatter(averagePrice)} đ</div>
             </h2>
           </div>
         </div>

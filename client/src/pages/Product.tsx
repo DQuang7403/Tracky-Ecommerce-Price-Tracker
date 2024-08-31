@@ -29,6 +29,7 @@ type ProductCardProp = {
   description: string[];
   priceHistory?: number[];
   dateHistory?: string[];
+  site: string;
 };
 type TrackedProduct = {
   id: string;
@@ -70,6 +71,7 @@ export default function Product() {
           `/product/scrape`,
           {
             href: state.href,
+            site: state.site,
           },
           {
             signal: controller.signal,
@@ -94,6 +96,7 @@ export default function Product() {
                 res.data?.priceHistory,
                 res.data?.dateHistory,
               ),
+              site: state.site,
               targetPrice: res.data.targetPrice,
             }),
           );
@@ -127,6 +130,7 @@ export default function Product() {
           specialOffer: productDetails.specialOffer,
           available: productDetails.available,
           transportOffer: productDetails.transportOffer,
+          site: state.site,
         });
         if (res?.error?.status === 401) {
           toast({
@@ -160,6 +164,7 @@ export default function Product() {
               res.data.product?.dateHistory,
             ),
             targetPrice: res.data.targetPrice,
+            site: state.site,
           }),
         );
         setTracked({ id: res.data.id, name: productDetails.name });
@@ -206,6 +211,7 @@ export default function Product() {
             res.data?.dateHistory,
           ),
           targetPrice: res.data.targetPrice,
+          site: state.site,
         }),
       );
     } catch (error) {

@@ -1,7 +1,8 @@
 import { useGetTrackedProductsQuery } from "../redux/slice/userApiSlice";
 import ProductCard from "../components/ProductCard";
 import { ProductCardProp } from "../utils/constants";
-import Notfound from "../assets/not_found.svg";type TrackedProductsProps = {
+import Notfound from "../assets/not_found.svg";
+type TrackedProductsProps = {
   data: ProductCardProp[];
   isLoading: boolean;
   isSuccess: boolean;
@@ -33,6 +34,7 @@ export default function TrackedProducts() {
                   price={product.price}
                   unit={product.unit}
                   specialOffer={product.specialOffer}
+                  site={product.site}
                 />
               );
             })}

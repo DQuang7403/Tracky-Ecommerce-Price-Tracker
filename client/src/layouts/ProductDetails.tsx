@@ -50,9 +50,14 @@ export default function ProductDetails({
       <CardHeader>
         <CardTitle>{productDetails.name}</CardTitle>
         <CardDescription className="py-2">
-          <h3>Current Price: {priceFormatter(productDetails.price)}</h3>
-          <h3>Availability: {productDetails.available}</h3>
-          <h3>Unit: {state.unit}</h3>
+          <h3>
+            Current Price:{" "}
+            <strong>{priceFormatter(productDetails.price)} đ</strong>
+          </h3>
+          {productDetails.available && (
+            <h3>Availability: {productDetails.available}</h3>
+          )}
+          {productDetails.unit && <h3>Unit: {state.unit}</h3>}
         </CardDescription>
       </CardHeader>
 
@@ -72,7 +77,11 @@ export default function ProductDetails({
           {<li>Discount: {state.discount || 0} %</li>}
         </ul>
       </CardContent>
-      <Link to={state.href} className="mt-4 ml-4 absolute bottom-4">
+      <Link
+        to={state.href}
+        target="_blank"
+        className="mt-4 ml-4 absolute bottom-4"
+      >
         <Button>Buy now</Button>
       </Link>
     </Card>

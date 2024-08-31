@@ -1,8 +1,8 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import cron from "node-cron";
-import { scrapeSingleProduct } from "../scraper/winmart.js";
-import { convertPriceStringToFloat } from "../controllers/products.js";
+import { scrapeSingleProductFromWinmart } from "../scraper/winmart.js";
+import { scrapeSingleProductFromBachHoaXanh } from "../scraper/bachhoaxanh.js";
 import { deleteRedisItem, getRedisItem, setRedisItem } from "./redis.js";
 import { sendEmail } from "../feature/mail_sender.js";
 async function scheduleUserCronJob(user) {
@@ -64,30 +64,33 @@ const updateProducts = async (user) => {
       autoUpdateTargetPrice: true,
     });
     if (!DBProduct) continue;
-    if (DBProduct.autoUpdateTargetPrice === false) continue;
 
-    const updatedProduct = await scrapeSingleProduct(product.href);
-    const formatPrice = convertPriceStringToFloat(updatedProduct.price);
+    let updatedProduct = null;
+    if (product.site === "winmart") {
+      updatedProduct = await scrapeSingleProductFromWinmart(product.href);
+    } else if (product.site === "bachhoaxanh") {
+      updatedProduct = await scrapeSingleProductFromBachHoaXanh(product.href);
+    }
     const updatedProductWithPrice = await Product.findOneAndUpdate(
       { href: product.href },
       {
-        $set: { ...updatedProduct, price: formatPrice },
+        $set: { ...updatedProduct },
         $push: {
-          priceHistory: formatPrice,
+          priceHistory: updatedProduct.price,
           dateHistory: new Date(),
         },
       },
       { new: true },
     );
     if (
-      updatedProductWithPrice.targetPrice > formatPrice &&
+      updatedProductWithPrice.targetPrice > updatedProduct.price &&
       updatedProductWithPrice.targetPrice !== 0 &&
       user.receiveGmail
     ) {
       await sendEmail(
         user.email,
         user.name,
-        formatPrice,
+        updatedProduct.price,
         product.href,
         product.name,
       );

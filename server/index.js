@@ -11,9 +11,10 @@ import cron from "node-cron";
 import mongoose from "mongoose";
 import { connectDB } from "./config/mongodb.js";
 import { initializeCronJobs } from "./feature/cronJob.js";
-import { scrapeSaleProducts } from "./scraper/winmart.js";
+import { scrapeSaleProductsFromWinmart } from "./scraper/winmart.js";
 import { corsOptions } from "./config/corsOptions.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { scrapeSaleProductsFromBachHoaXanh } from "./scraper/bachhoaxanh.js";
 const app = express();
 dotenv.config();
 
@@ -43,7 +44,9 @@ initializeCronJobs()
   });
 
 cron.schedule("0 0 * * *", async () => {
-  let products = await scrapeSaleProducts();
+  let products = await scrapeSaleProductsFromWinmart();
+  products = products.concat(await scrapeSaleProductsFromBachHoaXanh());
+  products = shuffleArray(products);
   await setRedisItem("SALE_PRODUCTS", products);
   console.log("Updated sale products");
 });

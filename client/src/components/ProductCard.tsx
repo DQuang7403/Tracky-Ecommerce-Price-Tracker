@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ProductCardProp } from "../utils/constants";
 import { Skeleton } from "./ui/skeleton";
+import priceFormatter from "../utils/priceFormatter";
 
 export default function ProductCard({
   isLoading,
@@ -20,6 +21,7 @@ export default function ProductCard({
   specialOffer,
   image,
   unit,
+  site,
 }: ProductCardProp) {
   const content = isLoading ? (
     <Card className="w-[300px] relative h-[400px] flex flex-col p-4">
@@ -43,10 +45,17 @@ export default function ProductCard({
           </div>
         ))}
       <CardHeader>
-        <img src={`${image}`} className="w-52 mx-auto" />
+        <img src={`${image}`} className="w-52 h-52 mx-auto" />
         <CardTitle>{`${name}`}</CardTitle>
-        <CardDescription>Price: {price}</CardDescription>
-        <CardDescription>Unit: {unit}</CardDescription>
+        <CardDescription>
+          Price: <strong>{priceFormatter(price)} đ</strong>
+        </CardDescription>
+        {site !== null && (
+          <CardDescription>
+            Site: <strong>{site}</strong>
+          </CardDescription>
+        )}
+        {unit !== null && <CardDescription>Unit: {unit}</CardDescription>}
       </CardHeader>
       <CardContent className="text-sm">
         <p className="line-clamp-1">
@@ -64,6 +73,7 @@ export default function ProductCard({
             image: image,
             discount: discount,
             unit: unit,
+            site: site,
           }}
         >
           <Button>Details</Button>

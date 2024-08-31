@@ -8,6 +8,7 @@ type ProductsSliceType = {
     specialOffer : string | null;
     image : string;
     unit : string;
+    site: string;
   }[],
   loading: boolean,
   error: boolean,
@@ -24,7 +25,8 @@ type ProductsSliceType = {
     description: string[],
     data?:any[];
     targetPrice: number,
-    autoUpdateTargetPrice: boolean
+    autoUpdateTargetPrice: boolean,
+    site: string,
   },
 }
 

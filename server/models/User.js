@@ -4,6 +4,7 @@ const TrackedProductSchema = mongoose.Schema(
     id: String,
     name: String,
     href: String,
+    site: String,
   },
   { _id: false },
 );

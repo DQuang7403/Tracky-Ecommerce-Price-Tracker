@@ -1,28 +1,21 @@
 import Product from "../models/Product.js";
 import { createError } from "../middleware/createError.js";
 import {
-  scrapeSaleProducts,
-  scrapeSingleProduct,
-  scrapeProductsByName,
+  scrapeSaleProductsFromWinmart,
+  scrapeSingleProductFromWinmart,
+  scrapeProductsByNameFromWinmart,
 } from "../scraper/winmart.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
 import { addOrUpdateCronJob } from "../feature/cronJob.js";
 import { sendEmail } from "../feature/mail_sender.js";
 import { getRedisItem } from "../feature/redis.js";
-
-export function convertPriceStringToFloat(priceString) {
-  // Remove the currency symbol and any extra spaces
-  let cleanedString = priceString.replace(/[^\d,]/g, "");
-
-  // Replace the thousand separator with nothing
-  cleanedString = cleanedString.replace(/\./g, "");
-
-  // Convert the resulting string to a float
-  const priceFloat = parseFloat(cleanedString);
-
-  return priceFloat;
-}
+import {
+  scrapeSaleProductsFromBachHoaXanh,
+  scrapeSingleProductFromBachHoaXanh,
+  scrapeProductsByNameFromBachHoaXanh,
+} from "../scraper/bachhoaxanh.js";
+import shuffleArray from "../feature/shuffleArray.js";
 
 //@desc get product by id
 //@route GET /api/product/id/:id
@@ -82,11 +75,13 @@ export const getTrackedProducts = async (req, res, next) => {
 //@access Public
 export const getOfferProduct = async (req, res, next) => {
   try {
-    const products = await scrapeSaleProducts();
+    let products = [];
+    products = await scrapeSaleProductsFromWinmart();
+    products = products.concat(await scrapeSaleProductsFromBachHoaXanh());
     if (!products) {
       return res.status(500).json("Something went wrong");
     }
-    res.status(200).json(products);
+    res.status(200).json(shuffleArray(products));
   } catch (error) {
     next(createError(error));
   }
@@ -112,6 +107,7 @@ export const addTrackedProduct = async (req, res, next) => {
             id: newProduct._id.toString(),
             name: newProduct.name,
             href: newProduct.href,
+            site: newProduct.site,
           },
         },
       },
@@ -143,28 +139,30 @@ export const updateTrackedProduct = async (req, res, next) => {
     if (!product) {
       return next(createError(404, "Product not found"));
     }
-    const updatedProduct = await scrapeSingleProduct(req.body.href);
+    let updatedProduct = null;
+    if (product.site === "winmart") {
+      updatedProduct = await scrapeSingleProductFromWinmart(req.body.href);
+    } else if (product.site === "bachhoaxanh") {
+      updatedProduct = await scrapeSingleProductFromBachHoaXanh(req.body.href);
+    }
     if (!updatedProduct) {
       res.status(404).json({ error: "Product not found" });
     }
-    const formatPrice = convertPriceStringToFloat(updatedProduct.price);
     const updatedProductWithPrice = await Product.findOneAndUpdate(
       { href: req.body.href },
       {
         $set: {
           ...updatedProduct,
-          price: formatPrice,
-          discount: !updatedProduct.discount ? null : product.discount,
         },
         $push: {
-          priceHistory: formatPrice,
+          priceHistory: updatedProduct.price,
           dateHistory: new Date(),
         },
       },
       { new: true },
     );
     if (
-      updatedProductWithPrice.targetPrice > formatPrice &&
+      updatedProductWithPrice.targetPrice > updatedProduct.price &&
       updatedProductWithPrice.targetPrice !== 0 &&
       user.receiveGmail
     ) {
@@ -218,11 +216,16 @@ export const removeTrackedProduct = async (req, res, next) => {
 //@access Public
 export const searchProduct = async (req, res, next) => {
   try {
-    const products = await scrapeProductsByName(req.body.search, 10);
+    const searchParam = req.body.search;
+    let products = [];
+    products = await scrapeProductsByNameFromBachHoaXanh(searchParam);
+    products = products.concat(
+      await scrapeProductsByNameFromWinmart(searchParam),
+    );
     if (!products) {
       return res.status(500).json("Something went wrong");
     }
-    res.status(200).json(products);
+    res.status(200).json(shuffleArray(products));
   } catch (error) {
     console.log(error);
     next(createError(error));
@@ -235,23 +238,23 @@ export const searchProduct = async (req, res, next) => {
 export const scrapeProduct = async (req, res, next) => {
   try {
     let storedProduct = await Product.findOne({ href: req.body.href });
-    let product = await scrapeSingleProduct(req.body.href);
-
+    let product = null;
+    if (req.body.site === "winmart") {
+      product = await scrapeSingleProductFromWinmart(req.body.href);
+    } else if (req.body.site === "bachhoaxanh") {
+      product = await scrapeSingleProductFromBachHoaXanh(req.body.href);
+    }
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-    //TODO: Check if there is a discount
-
-    const formatPrice = convertPriceStringToFloat(product.price);
     if (storedProduct) {
       res.status(200).json({
         ...storedProduct._doc,
         ...product,
-        price: formatPrice,
         discount: !product.discount ? null : storedProduct._doc.discount,
       });
     }
-    res.status(200).json({ ...product, price: formatPrice });
+    res.status(200).json(product);
   } catch (error) {
     console.log(error);
     next(createError(error));
