@@ -15,6 +15,7 @@ import { scrapeSaleProductsFromWinmart } from "./scraper/winmart.js";
 import { corsOptions } from "./config/corsOptions.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { scrapeSaleProductsFromBachHoaXanh } from "./scraper/bachhoaxanh.js";
+import shuffleArray from "./feature/shuffleArray.js";
 const app = express();
 dotenv.config();
 
@@ -44,10 +45,10 @@ initializeCronJobs()
   });
 
 cron.schedule("0 0 * * *", async () => {
-  let products = await scrapeSaleProductsFromWinmart();
+  let products = [];
+  products = await scrapeSaleProductsFromWinmart();
   products = products.concat(await scrapeSaleProductsFromBachHoaXanh());
-  products = shuffleArray(products);
-  await setRedisItem("SALE_PRODUCTS", products);
+  await setRedisItem("SALE_PRODUCTS", shuffleArray(products));
   console.log("Updated sale products");
 });
 
