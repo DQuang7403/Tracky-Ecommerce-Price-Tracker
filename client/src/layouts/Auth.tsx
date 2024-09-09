@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "../components/ui/tooltip";
 import passwordChecker from "../utils/passwordChecker";
+import { type } from "os";
 
 export default function Auth() {
   const [loginEmail, setLoginEmail] = useState<string>("");
@@ -131,6 +132,7 @@ export default function Auth() {
               placeholder="password"
               required
               value={signupPassword}
+              onFocus={(e) => e.target.type = "text"}
               onChange={(e) => setSignUpPassword(e.target.value)}
             />
             <div className="flex items-center self-start space-x-2">

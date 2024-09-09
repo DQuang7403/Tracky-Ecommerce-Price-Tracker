@@ -27,15 +27,18 @@ export default function PriceHistory({
 }: PriceHistoryProps) {
   const minPrice = useMemo(
     () =>
-      data.reduce((a, b) => {
-        return {
-          price_history: Math.min(a.price_history, b.price_history),
-          date_history: "",
-        };
-      }),
+      data.length > 0
+        ? data.reduce((a, b) => {
+            return {
+              price_history: Math.min(a.price_history, b.price_history),
+              date_history: "",
+            };
+          }, data[0])
+        : null, // or some default value
     [data],
   );
   const averagePrice = useMemo(() => {
+    if (data.length === 0) return 0;
     let sum = 0;
     for (let i = 0; i < data.length; i++) {
       sum += data[i].price_history;
