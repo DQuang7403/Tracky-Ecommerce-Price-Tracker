@@ -74,16 +74,16 @@ const updateProducts = async (user) => {
     const updatedProductWithPrice = await Product.findOneAndUpdate(
       { href: product.href },
       {
-        $set: { ...updatedProduct },
+        $set: { ...updatedProduct.productDetails },
         $push: {
-          priceHistory: updatedProduct.price,
+          priceHistory: updatedProduct.productDetails.price,
           dateHistory: new Date(),
         },
       },
       { new: true },
     );
     if (
-      updatedProductWithPrice.targetPrice > updatedProduct.price &&
+      updatedProductWithPrice.targetPrice > updatedProduct.productDetails.price &&
       updatedProductWithPrice.targetPrice !== 0 &&
       user.receiveGmail
     ) {

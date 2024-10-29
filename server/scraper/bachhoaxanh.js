@@ -2,6 +2,11 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { executablePath } from "puppeteer";
 import proxyChain from "proxy-chain";
+import {
+  extractBodyContent,
+  cleanBodyContent,
+  splitDomContent,
+} from "./preprocessor.js";
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -47,7 +52,7 @@ export async function scrapeSaleProductsFromBachHoaXanh() {
 
     //go to the website page
     await page.goto(`https://www.bachhoaxanh.com/`, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
 
     const selector = ".content-stretch";
@@ -121,7 +126,7 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
     //go to the website page
     await page.goto(`https://www.bachhoaxanh.com/`, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
 
     const selector = "div#input_open_search";
@@ -192,8 +197,15 @@ export async function scrapeSingleProductFromBachHoaXanh(productURL) {
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
     await page.goto(`${productURL}`, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
+
+    const htmlContent = await page.content(); // Get the HTML of the page
+
+    // Process the content
+    const bodyContent = extractBodyContent(htmlContent);
+    const cleanedContent = cleanBodyContent(bodyContent);
+    const chunks = splitDomContent(cleanedContent);
 
     await autoScroll(page);
 
@@ -267,7 +279,7 @@ export async function scrapeSingleProductFromBachHoaXanh(productURL) {
         site: "bachhoaxanh",
       };
     });
-    return productDetails;
+    return { productDetails: productDetails, chunks: chunks };
   } catch (error) {
     console.error(error);
   } finally {

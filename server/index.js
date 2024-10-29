@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import userRoutes from "./routes/users.js";
 import productRoutes from "./routes/product.js";
+import chatRoutes from "./routes/chat.js";
 import { logger } from "./middleware/logEvents.js";
 import authRoutes from "./routes/auth.js";
 import cors from "cors";
@@ -33,6 +34,7 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/chatbot", chatRoutes);
 
 app.use(errorHandler);
 

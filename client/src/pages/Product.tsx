@@ -20,6 +20,7 @@ import PriceHistory from "../layouts/PriceHistory";
 import { toast } from "../components/ui/use-toast";
 import graphDataFormatter from "../utils/graphDataFormatter";
 import ScheduledScrape from "../layouts/ProductOptions";
+import Chat from "../layouts/Chat";
 type ProductCardProp = {
   name: string;
   price: number;
@@ -51,6 +52,7 @@ export default function Product() {
   const currentUser = useAppSelector(selectCurrentUser);
   const seletedProduct = useAppSelector((state) => state.products.product);
   const [tracked, setTracked] = useState<TrackedProduct | null>(null);
+  const [context, setContext] = useState<string>("");
 
   useEffect(() => {
     if (currentUser) {
@@ -101,6 +103,9 @@ export default function Product() {
             }),
           );
         }
+        console.log(res.data);
+        
+        setContext(res.data.productContext);
         setIsLoading(false);
       } catch (error: any) {
         console.log(error);
@@ -220,6 +225,7 @@ export default function Product() {
   };
   return (
     <section className="px-1 sm:px-20 my-4 lg:my-10">
+      <Chat context={context} isLoading={isLoading} />
       <div>
         <div className="flex flex-col lg:flex-row items-top gap-4">
           <div className="lg:w-[550px] flex md:p-6 p-2 items-center justify-center aspect-square bg-blue shadow-xl bg-[#F2F2F2] rounded-lg relative">

@@ -3,6 +3,11 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { executablePath } from "puppeteer";
 import proxyChain from "proxy-chain";
 
+import {
+  extractBodyContent,
+  cleanBodyContent,
+  splitDomContent,
+} from "./preprocessor.js";
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -62,7 +67,7 @@ export async function scrapeSaleProductsFromWinmart() {
 
     //go to the website page
     await page.goto(`https://winmart.vn/`, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
 
     await closeFloatingAd(page);
@@ -150,7 +155,7 @@ export async function scrapeProductsByNameFromWinmart(productName) {
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
     //go to the website page
     await page.goto(`https://winmart.vn/`, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
 
     const selector = ".search-boxstyle__StyledInput-sc-1p7r5j6-1";
@@ -159,7 +164,7 @@ export async function scrapeProductsByNameFromWinmart(productName) {
     //go to page box
     await page.type(".search-boxstyle__StyledInput-sc-1p7r5j6-1", productName);
     await page.keyboard.press("Enter");
-    await page.waitForNavigation({ waitUntil: "domcontentloaded" });
+    await page.waitForNavigation({ waitUntil: "networkidle0" });
     //auto scroll to load products
     await autoScroll(page);
     //actual scraping products
@@ -245,6 +250,11 @@ export async function scrapeSingleProductFromWinmart(productURL) {
       waitUntil: "domcontentloaded",
     });
 
+    const htmlContent = await page.content(); // Get the HTML of the page
+    const bodyContent = extractBodyContent(htmlContent);
+    const cleanedContent = cleanBodyContent(bodyContent);
+    const chunks = splitDomContent(cleanedContent);
+
     const selector = ".product-detailsstyle__ProductInfo-sc-127s7qc-4.kxyanY";
     const el = await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
 
@@ -302,7 +312,7 @@ export async function scrapeSingleProductFromWinmart(productURL) {
       };
     });
 
-    return productDetails;
+    return { productDetails: productDetails, chunks: chunks };
   } catch (error) {
     console.error(error);
   } finally {
@@ -324,7 +334,7 @@ const testBot = async () => {
     });
     const page = await browser.newPage();
     await page.goto("https://bot.sannysoft.com/", {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
     });
     await page.screenshot({ path: "example.png" });
     await browser.close();

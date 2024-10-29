@@ -152,17 +152,18 @@ export const updateTrackedProduct = async (req, res, next) => {
       { href: req.body.href },
       {
         $set: {
-          ...updatedProduct,
+          ...updatedProduct.productDetails,
         },
         $push: {
-          priceHistory: updatedProduct.price,
+          priceHistory: updatedProduct.productDetails.price,
           dateHistory: new Date(),
         },
       },
       { new: true },
     );
     if (
-      updatedProductWithPrice.targetPrice > updatedProduct.price &&
+      updatedProductWithPrice.targetPrice >
+        updatedProduct.productDetails.price &&
       updatedProductWithPrice.targetPrice !== 0 &&
       user.receiveGmail
     ) {
@@ -250,11 +251,16 @@ export const scrapeProduct = async (req, res, next) => {
     if (storedProduct) {
       res.status(200).json({
         ...storedProduct._doc,
-        ...product,
-        discount: !product.discount ? null : storedProduct._doc.discount,
+        ...product.productDetails,
+        discount: !product.productDetails.discount
+          ? null
+          : storedProduct._doc.discount,
+        productContext: product.chunks[0],
       });
     }
-    res.status(200).json(product);
+    res
+      .status(200)
+      .json({ ...product.productDetails, productContext: product.chunks[0] });
   } catch (error) {
     console.log(error);
     next(createError(error));
