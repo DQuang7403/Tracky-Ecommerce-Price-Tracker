@@ -2,20 +2,26 @@ import Product from "../models/Product.js";
 import { createError } from "../middleware/createError.js";
 import {
   scrapeSaleProductsFromWinmart,
-  scrapeSingleProductFromWinmart,
   scrapeProductsByNameFromWinmart,
-} from "../scraper/winmart.js";
+} from "../scraper/Scraper_Function/winmart.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
 import { addOrUpdateCronJob } from "../feature/cronJob.js";
 import { sendEmail } from "../feature/mail_sender.js";
 import { getRedisItem } from "../feature/redis.js";
-import {
-  scrapeSaleProductsFromBachHoaXanh,
-  scrapeSingleProductFromBachHoaXanh,
-  scrapeProductsByNameFromBachHoaXanh,
-} from "../scraper/bachhoaxanh.js";
+import { scrapeSaleProductsFromBachHoaXanh } from "../scraper/Scraper_Function/bachhoaxanh.js";
 import shuffleArray from "../feature/shuffleArray.js";
+import {
+  getBachhoaxanhScraper,
+  getWinmartScraper,
+} from "../scraper/Factory/instances.js";
+import {
+  ScrapeSingleProduct,
+  ScrapeProductByName,
+} from "../scraper/Scraper_Function/Stragegy.js";
+
+const winmartScraper = getWinmartScraper();
+const bachhoaxanhScraper = getBachhoaxanhScraper();
 
 //@desc get product by id
 //@route GET /api/product/id/:id
@@ -26,7 +32,7 @@ export const getProductById = async (req, res, next) => {
     if (!product) {
       return next(createError(404, "Product not found"));
     }
-    res.status(200).json(product);
+    return res.status(200).json(product);
   } catch (error) {
     next(createError(error));
   }
@@ -41,7 +47,7 @@ export const getProductByTitle = async (req, res, next) => {
     if (!product) {
       return next(createError(404, "Product not found"));
     }
-    res.status(200).json(product);
+    return res.status(200).json(product);
   } catch (error) {
     next(createError(error));
   }
@@ -63,25 +69,29 @@ export const getTrackedProducts = async (req, res, next) => {
         ),
       },
     });
-    res.status(200).json(trackedProducts);
+    return res.status(200).json(trackedProducts);
   } catch (error) {
     console.log(error);
     next(createError(error));
   }
 };
+/**
+ * @desc get offer products
+ * @route GET /api/product/offer
+ * @access Public
+ */
 
-//@desc get offer products
-//@route GET /api/product/offer
-//@access Public
 export const getOfferProduct = async (req, res, next) => {
   try {
     let products = [];
+    console.time("Scraping time");
     products = await scrapeSaleProductsFromWinmart();
     products = products.concat(await scrapeSaleProductsFromBachHoaXanh());
+    console.timeEnd("Scraping time");
     if (!products) {
       return res.status(500).json("Something went wrong");
     }
-    res.status(200).json(shuffleArray(products));
+    return res.status(200).json(shuffleArray(products));
   } catch (error) {
     next(createError(error));
   }
@@ -141,12 +151,16 @@ export const updateTrackedProduct = async (req, res, next) => {
     }
     let updatedProduct = null;
     if (product.site === "winmart") {
-      updatedProduct = await scrapeSingleProductFromWinmart(req.body.href);
+      await winmartScraper.setStrategy(new ScrapeSingleProduct(req.body.href));
+      updatedProduct = await winmartScraper.scrape();
     } else if (product.site === "bachhoaxanh") {
-      updatedProduct = await scrapeSingleProductFromBachHoaXanh(req.body.href);
+      await bachhoaxanhScraper.setStrategy(
+        new ScrapeSingleProduct(req.body.href),
+      );
+      updatedProduct = await bachhoaxanhScraper.scrape();
     }
     if (!updatedProduct) {
-      res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({ error: "Product not found" });
     }
     const updatedProductWithPrice = await Product.findOneAndUpdate(
       { href: req.body.href },
@@ -171,12 +185,12 @@ export const updateTrackedProduct = async (req, res, next) => {
       await sendEmail(
         user.email,
         user.name,
-        formatPrice,
+        updatedProduct.productDetails.price,
         product.href,
         product.name,
       );
     }
-    res.status(200).json(updatedProductWithPrice);
+    return res.status(200).json(updatedProductWithPrice);
   } catch (error) {
     console.log(error);
     next(createError(error));
@@ -219,14 +233,17 @@ export const searchProduct = async (req, res, next) => {
   try {
     const searchParam = req.body.search;
     let products = [];
-    products = await scrapeProductsByNameFromBachHoaXanh(searchParam);
-    products = products.concat(
-      await scrapeProductsByNameFromWinmart(searchParam),
-    );
+    await bachhoaxanhScraper.setStrategy(new ScrapeProductByName(searchParam));
+    products = [...products, ...(await bachhoaxanhScraper.scrape())];
+
+    await winmartScraper.setStrategy(new ScrapeProductByName(searchParam));
+    products = [...products, ...(await winmartScraper.scrape())];
+
+    
     if (!products) {
       return res.status(500).json("Something went wrong");
     }
-    res.status(200).json(shuffleArray(products));
+    return res.status(200).json(shuffleArray(products));
   } catch (error) {
     console.log(error);
     next(createError(error));
@@ -240,29 +257,39 @@ export const scrapeProduct = async (req, res, next) => {
   try {
     let storedProduct = await Product.findOne({ href: req.body.href });
     let product = null;
+
     if (req.body.site === "winmart") {
-      product = await scrapeSingleProductFromWinmart(req.body.href);
+      await winmartScraper.setStrategy(new ScrapeSingleProduct(req.body.href));
+      product = await winmartScraper.scrape();
     } else if (req.body.site === "bachhoaxanh") {
-      product = await scrapeSingleProductFromBachHoaXanh(req.body.href);
+      await bachhoaxanhScraper.setStrategy(
+        new ScrapeSingleProduct(req.body.href),
+      );
+      product = await bachhoaxanhScraper.scrape();
     }
-    if (!product) {
+
+    // Check if the product was found during scraping
+    if (!product || !product.productDetails) {
       return res.status(404).json({ error: "Product not found" });
     }
+
     if (storedProduct) {
-      res.status(200).json({
+      return res.status(200).json({
         ...storedProduct._doc,
         ...product.productDetails,
-        discount: !product.productDetails.discount
-          ? null
-          : storedProduct._doc.discount,
+        discount: product.productDetails.discount
+          ? storedProduct._doc.discount
+          : null,
         productContext: product.chunks[0],
       });
     }
-    res
-      .status(200)
-      .json({ ...product.productDetails, productContext: product.chunks[0] });
+
+    return res.status(200).json({
+      ...product.productDetails,
+      productContext: product.chunks[0],
+    });
   } catch (error) {
-    console.log(error);
+    console.log("Error in scrapeProduct function:", error);
     next(createError(error));
   }
 };
@@ -310,9 +337,9 @@ export const getInitialSaleProducts = async (req, res, next) => {
   try {
     const products = await getRedisItem("SALE_PRODUCTS");
     if (!products.found) {
-      res.status(500).json("Something went wrong");
+      return res.status(500).json("Something went wrong");
     }
-    res.status(200).json(products.data);
+    return res.status(200).json(products.data);
   } catch (error) {
     console.log(error);
   }

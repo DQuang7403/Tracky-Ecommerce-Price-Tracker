@@ -31,13 +31,13 @@ export default function ProductCard({
         <Skeleton className="h-4 w-[250px]" />
         <Skeleton className="h-4 w-[200px]" />
       </div>
-      <div className="flex gap-4 mt-auto items-center">
+      <div className="flex gap-4  items-center">
         <Skeleton className="h-10 w-[100px] mt-4" />
         <Skeleton className="h-10 w-[100px] mt-4" />
       </div>
     </Card>
   ) : (
-    <Card className="max-w-[300px] relative h-full flex flex-col">
+    <Card className="max-w-[300px] relative h-[460px] flex flex-col">
       {!discount ||
         (discount !== null && (
           <div className="absolute top-5 left-5 bg-[#DB4444] px-2 py-1 rounded-lg text-white font-semibold text-sm">

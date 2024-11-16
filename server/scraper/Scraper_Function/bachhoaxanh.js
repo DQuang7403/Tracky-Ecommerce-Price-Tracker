@@ -6,7 +6,7 @@ import {
   extractBodyContent,
   cleanBodyContent,
   splitDomContent,
-} from "./preprocessor.js";
+} from "../preprocessor.js";
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -16,9 +16,9 @@ let browser;
 
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    let limit = 150;
+    const limit = 1000;
     let totalHeight = 0;
-    let distance = 100;
+    const distance = 200;
     await new Promise((resolve, reject) => {
       let timer = setInterval(() => {
         let scrollHeight = document.body.scrollHeight;
@@ -52,7 +52,7 @@ export async function scrapeSaleProductsFromBachHoaXanh() {
 
     //go to the website page
     await page.goto(`https://www.bachhoaxanh.com/`, {
-      waitUntil: "networkidle0",
+      waitUntil: "networkidle2",
     });
 
     const selector = ".content-stretch";
@@ -113,7 +113,7 @@ export async function scrapeSaleProductsFromBachHoaXanh() {
 export async function scrapeProductsByNameFromBachHoaXanh(productName) {
   try {
     browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -124,21 +124,24 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
 
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
-    //go to the website page
+
+    // Go to the website page
     await page.goto(`https://www.bachhoaxanh.com/`, {
-      waitUntil: "networkidle0",
+      waitUntil: "networkidle2",
     });
 
     const selector = "div#input_open_search";
-    await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
+    await page.waitForSelector(selector, { timeout: 5000 });
     await page.click(selector);
-    //go to page box
+
+    // Type in the search box
     await page.type("input#txt_search_product", productName);
     await page.keyboard.press("Enter");
 
-    //auto scroll to load products
+    // Auto scroll to load products
     await autoScroll(page);
-    //actual scraping products
+
+    // Actual scraping products
     const products = await page.evaluate(() => {
       return Array.from(document.querySelectorAll(".box_product")).map(
         (product) => {
@@ -149,27 +152,31 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
             "div.absolute.right-6px.top-4px.rounded-4px > span",
           );
           const image = product.querySelector("img");
-
           const specialOffer = product.querySelector(
             "div.line-clamp-1.text-10",
           );
-          const priceAndUnit = priceElement.innerText;
+
+          // Price parsing with error handling
+          const priceAndUnit = priceElement ? priceElement.innerText : "";
           const priceMatch = priceAndUnit.match(/(\d+(?:\.\d+)?)₫/);
-          const price = Math.round(parseFloat(priceMatch[1]) * 1000); // convert to integer, removing decimal point
+          const price = priceMatch
+            ? Math.round(parseFloat(priceMatch[1]) * 1000)
+            : null;
+
+          // Unit parsing with error handling
           const unitMatch = priceAndUnit.match(/\/([0-9]+(?:[a-zA-Z]+)?)/);
-          const unit = unitMatch && unitMatch[1];
+          const unit = unitMatch ? unitMatch[1] : null;
 
           return {
             name: titleElement ? titleElement.innerText : null,
             href: linkElement ? linkElement.href : null,
             price: price,
             unit: unit,
-            discount: Number(
-              discountElement &&
-                discountElement.innerText.replace(/-|%/g, "").trim(),
-            ),
-            specialOffer: specialOffer && specialOffer.innerText.trim(),
-            image: image && image.src,
+            discount: discountElement
+              ? Number(discountElement.innerText.replace(/-|%/g, "").trim())
+              : null,
+            specialOffer: specialOffer ? specialOffer.innerText.trim() : null,
+            image: image ? image.src : null,
             site: "bachhoaxanh",
           };
         },
@@ -180,9 +187,10 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
     console.log("Scraping failed", error);
     return [];
   } finally {
-    await browser?.close();
+    await browser.close();
   }
 }
+
 export async function scrapeSingleProductFromBachHoaXanh(productURL) {
   try {
     browser = await puppeteer.launch({
@@ -197,7 +205,7 @@ export async function scrapeSingleProductFromBachHoaXanh(productURL) {
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
     await page.goto(`${productURL}`, {
-      waitUntil: "networkidle0",
+      waitUntil: "networkidle2",
     });
 
     const htmlContent = await page.content(); // Get the HTML of the page
@@ -287,6 +295,6 @@ export async function scrapeSingleProductFromBachHoaXanh(productURL) {
   }
 }
 
-// scrapeSingleProductFromBachHoaXanh(
-//   "https://www.bachhoaxanh.com/nuoc-ngot/loc-6-lon-nuoc-ngot-pepsi-khong-calo-vi-chanh-330ml",
-// );
+// scrapeProductsByNameFromBachHoaXanh("mi tom").then((products) => {
+//   console.log(products);
+// });

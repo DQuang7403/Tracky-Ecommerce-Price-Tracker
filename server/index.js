@@ -12,10 +12,10 @@ import cron from "node-cron";
 import mongoose from "mongoose";
 import { connectDB } from "./config/mongodb.js";
 import { initializeCronJobs } from "./feature/cronJob.js";
-import { scrapeSaleProductsFromWinmart } from "./scraper/winmart.js";
+import { scrapeSaleProductsFromWinmart } from "./scraper/Scraper_Function/winmart.js";
 import { corsOptions } from "./config/corsOptions.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { scrapeSaleProductsFromBachHoaXanh } from "./scraper/bachhoaxanh.js";
+import { scrapeSaleProductsFromBachHoaXanh } from "./scraper/Scraper_Function/bachhoaxanh.js";
 import shuffleArray from "./feature/shuffleArray.js";
 const app = express();
 dotenv.config();
@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Welcome to Tracky API" });
+  return res.status(200).json({ message: "Welcome to Tracky API" });
 });
 
 app.use("/api/user", userRoutes);

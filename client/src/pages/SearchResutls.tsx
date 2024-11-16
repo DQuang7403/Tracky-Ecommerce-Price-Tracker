@@ -12,6 +12,7 @@ export default function SearchResutls() {
       const controller = new AbortController();
       try {
         setIsLoading(true);
+        setSearchProducts([]);
         const res = await axios.post(
           `/product/search`,
           {
@@ -39,9 +40,9 @@ export default function SearchResutls() {
       <h2 className="text-xl md:text-3xl">
         We are searching for: <b>{searchParams}</b>
       </h2>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 mt-8">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 mt-8 relative">
         {isLoading ? (
-          <div className="max-w-[286px] aspect-square flex flex-col items-center justify-center bg-slate-300 rounded-md p-8">
+          <div className="max-w-[286px] aspect-square flex flex-col items-center justify-center bg-slate-300 rounded-md p-8 absolute right-1/2 transform translate-x-1/2">
             <img src={Searching} className="mb-4" loading="lazy" />
             <div className="loader"></div>
           </div>

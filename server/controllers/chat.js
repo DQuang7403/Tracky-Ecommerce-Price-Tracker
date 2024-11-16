@@ -1,11 +1,12 @@
 import { ChatGroq } from "@langchain/groq";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
-
+import dotenv from "dotenv";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 const formatMessage = (message) => {
   return `${message.role}: ${message.content}`;
 };
+dotenv.config();
 
 const TEMPLATE = `
 Bạn là một trợ lý hữu ích của trang web Tracky được giao nhiệm vụ trích xuất thông tin cụ thể từ nội dung văn bản của trang sản phẩm và trả lời các câu hỏi của người dùng chỉ dựa trên ngữ cảnh sau. Vui lòng làm theo các hướng dẫn sau một cách cẩn thận:
@@ -21,17 +22,17 @@ Current conversation: {chat_history}
 user: {question}
 assistant:
 `;
-
 const model = new ChatGroq({
-  apiKey: "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",
+  apiKey: process.env.GROQ_API_KEY,
   model: "llama3-8b-8192",
   temperature: 0.8,
   streaming: true,
 });
 export const dynamic = "force-dynamic";
-export const chat = async (req, res, next) => {
+export const chat = async (req, res, next) => { 
   try {
     const { messages, context } = await req.body;
+    console.log(context)
     const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
     const currentMessage = messages.at(-1).content;
     const prompt = PromptTemplate.fromTemplate(TEMPLATE);

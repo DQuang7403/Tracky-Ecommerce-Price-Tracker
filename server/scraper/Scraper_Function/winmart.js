@@ -7,7 +7,7 @@ import {
   extractBodyContent,
   cleanBodyContent,
   splitDomContent,
-} from "./preprocessor.js";
+} from "../preprocessor.js";
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -17,9 +17,9 @@ let browser;
 
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    let limit = 2000;
+    const limit = 2000;
     let totalHeight = 0;
-    let distance = 100;
+    const distance = 100;
     await new Promise((resolve, reject) => {
       let timer = setInterval(() => {
         let scrollHeight = document.body.scrollHeight;
@@ -34,7 +34,6 @@ async function autoScroll(page) {
     });
   });
 }
-
 async function closeFloatingAd(page) {
   try {
     const adSelector = ".floating__FloatingWrapper-sc-2rf53f-0.iAgrnJ";
@@ -51,10 +50,8 @@ async function closeFloatingAd(page) {
 
 export async function scrapeSaleProductsFromWinmart() {
   try {
-    // const oldProxyUrl = `http://${username}:${password}@p.webshare.io:80`;
-    // const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
     browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -66,15 +63,13 @@ export async function scrapeSaleProductsFromWinmart() {
     page.setDefaultNavigationTimeout(3 * 60 * 1000);
 
     //go to the website page
-    await page.goto(`https://winmart.vn/`, {
-      waitUntil: "networkidle0",
-    });
+
+    await page.goto(`https://winmart.vn/`, { waitUntil: "networkidle2" });
 
     await closeFloatingAd(page);
     await autoScroll(page);
 
     const selector = ".product-carousel-v2__SliderSection-sc-1hy54ys-4";
-    await page.waitForSelector(selector, { timeout: 3 * 60 * 1000 });
 
     const el = await page.$(selector);
 
@@ -155,16 +150,15 @@ export async function scrapeProductsByNameFromWinmart(productName) {
     page.setDefaultNavigationTimeout(2 * 60 * 1000);
     //go to the website page
     await page.goto(`https://winmart.vn/`, {
-      waitUntil: "networkidle0",
+      waitUntil: "networkidle2",
     });
 
     const selector = ".search-boxstyle__StyledInput-sc-1p7r5j6-1";
-    await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
     await page.click(selector);
     //go to page box
     await page.type(".search-boxstyle__StyledInput-sc-1p7r5j6-1", productName);
     await page.keyboard.press("Enter");
-    await page.waitForNavigation({ waitUntil: "networkidle0" });
+    await page.waitForNavigation({ waitUntil: "networkidle2" });
     //auto scroll to load products
     await autoScroll(page);
     //actual scraping products
@@ -256,7 +250,7 @@ export async function scrapeSingleProductFromWinmart(productURL) {
     const chunks = splitDomContent(cleanedContent);
 
     const selector = ".product-detailsstyle__ProductInfo-sc-127s7qc-4.kxyanY";
-    const el = await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
+    const el = await page.waitForSelector(selector, { timeout: 10000 });
 
     const productDetails = await el.evaluate(() => {
       const name =
@@ -334,7 +328,7 @@ const testBot = async () => {
     });
     const page = await browser.newPage();
     await page.goto("https://bot.sannysoft.com/", {
-      waitUntil: "networkidle0",
+      waitUntil: "networkidle2",
     });
     await page.screenshot({ path: "example.png" });
     await browser.close();
@@ -343,4 +337,4 @@ const testBot = async () => {
   }
 };
 
-// scrapeProductsByNameFromWinmart("coca")
+// scrapeSaleProductsFromWinmart();

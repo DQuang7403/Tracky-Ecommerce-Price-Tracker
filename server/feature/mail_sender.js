@@ -46,6 +46,5 @@ export const sendEmail = async (email, name, price, href, product) => {
     if (error) {
       return console.log(error);
     }
-    console.log("Email sent: " + info.response);
   });
 };

@@ -72,7 +72,7 @@ export const updateUser = async (req, res, next) => {
     await addOrUpdateCronJob(updateUser);
 
     const { password, hashedPassword, ...others } = updateUser._doc;
-    res.status(200).json({ msg: "Update successfully", user_info: others });
+    return res.status(200).json({ msg: "Update successfully", user_info: others });
   } catch (error) {
     next(error);
   }

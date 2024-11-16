@@ -42,7 +42,7 @@ export const login = async (req, res, next) => {
       email: req.body.email,
     });
     if (!isExisted) {
-      res.status(404).json({ msg: "This email is not registered" });
+      return res.status(404).json({ msg: "This email is not registered" });
     }
 
     let user = await User.findOne({
@@ -51,7 +51,7 @@ export const login = async (req, res, next) => {
     }).exec();
 
     if (!user) {
-      res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(
@@ -59,7 +59,7 @@ export const login = async (req, res, next) => {
       user.hashedPassword,
     );
     if (!isMatch) {
-      res.status(400).json({ msg: "Wrong password" });
+      return res.status(400).json({ msg: "Wrong password" });
     }
 
     const { hashedPassword, password, ...otherInfo } = user._doc;
@@ -85,7 +85,7 @@ export const login = async (req, res, next) => {
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res
+    return res
       .status(200)
       .json({ access_token: accessToken, user_info: { ...otherInfo } });
   } catch (error) {
@@ -120,7 +120,7 @@ export const refresh = async (req, res, next) => {
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: "15m" },
         );
-        res
+        return res
           .status(200)
           .json({ access_token: accessToken, user_info: otherInfo });
       },
@@ -141,7 +141,7 @@ export const signout = async (req, res, next) => {
       return res.status(203).json("You are not logged in");
     }
     res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-    res.status(200).json("Logged out successfully");
+    return res.status(200).json("Logged out successfully");
   } catch (error) {
     next(createError(error));
   }
@@ -187,7 +187,7 @@ export const signInWithGoogle = async (req, res, next) => {
       sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
-    res
+    return res
       .status(200)
       .json({ access_token: accessToken, user_info: { ...otherInfo } });
   } catch (err) {

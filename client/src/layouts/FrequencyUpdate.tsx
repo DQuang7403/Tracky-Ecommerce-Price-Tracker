@@ -30,7 +30,7 @@ export default function FrequencyUpdate({
     <div className="border-t mt-2">
       <hr />
       <div className="flex items-center gap-10 my-2 ">
-        <h2 className="text-xl text-gray-500">Update frequency</h2>
+        <h2 className="text-xl text-black uppercase font-semibold">Update frequency</h2>
         <TimeToUpdate
           frequency={autoUpdateConfig.frequency}
           hour={autoUpdateConfig.hour}

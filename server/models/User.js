@@ -41,11 +41,6 @@ const UserSchema = mongoose.Schema(
       type: [TrackedProductSchema],
       default: [],
     },
-    signWithGoogle: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     receiveGmail: {
       type: Boolean,
       default: false,

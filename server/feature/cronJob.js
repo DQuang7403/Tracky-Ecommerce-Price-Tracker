@@ -1,8 +1,8 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import cron from "node-cron";
-import { scrapeSingleProductFromWinmart } from "../scraper/winmart.js";
-import { scrapeSingleProductFromBachHoaXanh } from "../scraper/bachhoaxanh.js";
+import { scrapeSingleProductFromWinmart } from "../scraper/Scraper_Function/winmart.js";
+import { scrapeSingleProductFromBachHoaXanh } from "../scraper/Scraper_Function/bachhoaxanh.js";
 import { deleteRedisItem, getRedisItem, setRedisItem } from "./redis.js";
 import { sendEmail } from "../feature/mail_sender.js";
 async function scheduleUserCronJob(user) {
@@ -90,7 +90,7 @@ const updateProducts = async (user) => {
       await sendEmail(
         user.email,
         user.name,
-        updatedProduct.price,
+        updatedProduct.productDetails.price,
         product.href,
         product.name,
       );

@@ -9,5 +9,5 @@ export const errorHandler = (err, req, res, next) => {
 
   res.status(status);
 
-  res.json({ msg: err.msg, isError: true });
+  return res.json({ msg: err.msg, isError: true });
 };
