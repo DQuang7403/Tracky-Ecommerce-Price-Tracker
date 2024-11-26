@@ -13,7 +13,7 @@ if (import.meta.env.VITE_NODE_ENV === "production") {
 }
   
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <BrowserRouter>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
@@ -21,5 +21,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </PersistGate>
       </Provider>
     </BrowserRouter>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 );

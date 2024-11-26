@@ -85,9 +85,7 @@ export const login = async (req, res, next) => {
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return res
-      .status(200)
-      .json({ access_token: accessToken, user_info: { ...otherInfo } });
+    return res.status(200).json({ access_token: accessToken, user_info: { ...otherInfo } });
   } catch (error) {
     console.log(error);
     next(createError(error));

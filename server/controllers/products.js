@@ -239,7 +239,6 @@ export const searchProduct = async (req, res, next) => {
     await winmartScraper.setStrategy(new ScrapeProductByName(searchParam));
     products = [...products, ...(await winmartScraper.scrape())];
 
-    
     if (!products) {
       return res.status(500).json("Something went wrong");
     }

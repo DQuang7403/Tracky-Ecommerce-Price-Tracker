@@ -113,7 +113,7 @@ export async function scrapeSaleProductsFromBachHoaXanh() {
 export async function scrapeProductsByNameFromBachHoaXanh(productName) {
   try {
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -131,7 +131,7 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
     });
 
     const selector = "div#input_open_search";
-    await page.waitForSelector(selector, { timeout: 5000 });
+    // await page.waitForSelector(selector, { timeout: 5000 });
     await page.click(selector);
 
     // Type in the search box
@@ -148,32 +148,22 @@ export async function scrapeProductsByNameFromBachHoaXanh(productName) {
           const titleElement = product.querySelector(".product_name");
           const linkElement = product.querySelector("a");
           const priceElement = product.querySelector(".product_price");
-          const discountElement = product.querySelector(
-            "div.absolute.right-6px.top-4px.rounded-4px > span",
-          );
+          const discountElement = product.querySelector("span.ml-3px");
           const image = product.querySelector("img");
           const specialOffer = product.querySelector(
             "div.line-clamp-1.text-10",
           );
 
           // Price parsing with error handling
-          const priceAndUnit = priceElement ? priceElement.innerText : "";
-          const priceMatch = priceAndUnit.match(/(\d+(?:\.\d+)?)₫/);
-          const price = priceMatch
-            ? Math.round(parseFloat(priceMatch[1]) * 1000)
-            : null;
-
-          // Unit parsing with error handling
-          const unitMatch = priceAndUnit.match(/\/([0-9]+(?:[a-zA-Z]+)?)/);
-          const unit = unitMatch ? unitMatch[1] : null;
+          const priceText = priceElement ? priceElement.innerText : null;
+          const price = priceText ? parseInt(priceText.replace(".", "")) : null;
 
           return {
             name: titleElement ? titleElement.innerText : null,
             href: linkElement ? linkElement.href : null,
             price: price,
-            unit: unit,
             discount: discountElement
-              ? Number(discountElement.innerText.replace(/-|%/g, "").trim())
+              ? Number(discountElement.innerText.replace(/[-%]/g, "").trim()) // Remove "-" and "%" symbols
               : null,
             specialOffer: specialOffer ? specialOffer.innerText.trim() : null,
             image: image ? image.src : null,
