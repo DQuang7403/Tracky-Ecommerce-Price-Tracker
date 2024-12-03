@@ -81,7 +81,7 @@ export default function Chat({ context, isLoading }: ChatProps) {
         <div className="h-full flex flex-col flex-grow gap-4 mx-auto ">
           <ul
             ref={chatParent}
-            className="h-1 p-4 flex-grow bg-muted/90 overflow-y-auto flex flex-col gap-2"
+            className="h-1 p-4 flex-grow bg-muted/90 overflow-y-auto flex flex-col gap-2 text-sm"
           >
             {messages.map((m, index) => (
               <div key={index}>

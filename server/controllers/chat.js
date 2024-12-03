@@ -32,7 +32,6 @@ export const dynamic = "force-dynamic";
 export const chat = async (req, res, next) => { 
   try {
     const { messages, context } = await req.body;
-    console.log(context)
     const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
     const currentMessage = messages.at(-1).content;
     const prompt = PromptTemplate.fromTemplate(TEMPLATE);

@@ -3,11 +3,7 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { executablePath } from "puppeteer";
 import proxyChain from "proxy-chain";
 
-import {
-  extractBodyContent,
-  cleanBodyContent,
-  splitDomContent,
-} from "../preprocessor.js";
+import { extractBodyContent, cleanBodyContent } from "../preprocessor.js";
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -51,7 +47,7 @@ async function closeFloatingAd(page) {
 export async function scrapeSaleProductsFromWinmart() {
   try {
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -244,14 +240,12 @@ export async function scrapeSingleProductFromWinmart(productURL) {
       waitUntil: "domcontentloaded",
     });
 
-    const htmlContent = await page.content(); // Get the HTML of the page
-    const bodyContent = extractBodyContent(htmlContent);
-    const cleanedContent = cleanBodyContent(bodyContent);
-    const chunks = splitDomContent(cleanedContent);
-
     const selector = ".product-detailsstyle__ProductInfo-sc-127s7qc-4.kxyanY";
     const el = await page.waitForSelector(selector, { timeout: 10000 });
-
+    const htmlContent = await page.content(); // Get the HTML of the page
+    //TODO: There is some issue with the content extraction here
+    const bodyContent = extractBodyContent(htmlContent);
+    const chunks = [cleanBodyContent(bodyContent)];
     const productDetails = await el.evaluate(() => {
       const name =
         document
@@ -338,3 +332,6 @@ const testBot = async () => {
 };
 
 // scrapeSaleProductsFromWinmart();
+// scrapeSingleProductFromWinmart(
+//   "https://winmart.vn/products/custas-banh-cao-cap-orion-hop-138g--s10013504?storeCode=1535&storeGroupCode=1998",
+// );

@@ -42,7 +42,7 @@ export async function scrapeContent(url) {
     page.setDefaultNavigationTimeout(3 * 60 * 1000);
 
     await page.goto(url, {
-      waitUntil: "networkidle0", 
+      waitUntil: "networkidle0",
     });
 
     const htmlContent = await page.content(); // Get the HTML content of the page

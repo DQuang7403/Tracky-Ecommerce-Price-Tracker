@@ -198,19 +198,16 @@ export async function scrapeSingleProductFromBachHoaXanh(productURL) {
       waitUntil: "networkidle2",
     });
 
-    const htmlContent = await page.content(); // Get the HTML of the page
-
-    // Process the content
-    const bodyContent = extractBodyContent(htmlContent);
-    const cleanedContent = cleanBodyContent(bodyContent);
-    const chunks = splitDomContent(cleanedContent);
-
     await autoScroll(page);
 
     const selector = "div.relative.mb-5";
     const el = await page.waitForSelector(selector, { timeout: 2 * 60 * 1000 });
     await autoScroll(page);
+    const htmlContent = await page.content(); // Get the HTML of the page
 
+    // Process the content
+    const bodyContent = extractBodyContent(htmlContent);
+    const chunks = [cleanBodyContent(bodyContent)];
     const productDetails = await el.evaluate(() => {
       const name = document.querySelector("div>h1")?.innerText.trim() || null;
       let price, unit;

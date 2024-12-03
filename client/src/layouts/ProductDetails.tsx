@@ -89,27 +89,27 @@ export default function ProductDetails({
   const DescriptionContent = isLoading ? (
     loadingStateContent
   ) : (
-    <div>
+    <>
       {productDetails?.description && (
-        <Card className="max-h-[500px] overflow-y-scroll">
+        <Card className="max-h-[500px] h-screen overflow-y-scroll">
           <CardHeader>
             <CardTitle>{productDetails?.description[0]}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 ">
             {productDetails?.description.map(
               (detail: string, index: number) => {
                 return index !== 0 && <p key={index}>{detail}</p>;
               },
             )}
             {productDetails?.description.length === 0 && (
-              <h2 className="font-semibold">
+              <h2 className="font-semibold text-lg text-center min-h-10 ">
                 This product don't have any description
               </h2>
             )}
           </CardContent>
         </Card>
       )}
-    </div>
+    </>
   );
   return (
     <>

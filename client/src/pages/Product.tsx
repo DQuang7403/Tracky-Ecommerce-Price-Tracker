@@ -103,7 +103,6 @@ export default function Product() {
             }),
           );
         }
-        console.log(res.data);
         
         setContext(res.data.productContext);
         setIsLoading(false);
